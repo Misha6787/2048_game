@@ -1,0 +1,44 @@
+body {
+    text-align: center;
+}
+
+.score {
+    font-size: 96px;
+}
+
+.container {
+    display: flex;
+    position: relative;
+    width: 500px;
+    margin: 24px auto;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.block {
+    width: 125px;
+    height: 125px;
+    position: relative;
+    background-color: #bbada0;
+}
+
+.empty__block, .fill__block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    width: calc(100% - 15px);
+    height: calc(100% - 15px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.empty__block {
+    background-color: #cdc1b4;
+}
+
+.fill__block {
+    background-color: #eee4da;
+}
