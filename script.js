@@ -1,9 +1,9 @@
 const container = document.querySelector('.container');
 const arrowBtns = ['ArrowUp', 'ArrowLeft', 'ArrowRight', 'ArrowBottom'];
 let arrBlocks = [
-    [2,2,0,0],
-    [0,0,2,2],
-    [2,0,2,0],
+    [4,4,2,2],
+    [0,0,0,0],
+    [0,0,0,0],
     [0,0,0,0]
 ]
 
@@ -11,19 +11,43 @@ const slideLeft = () => {
     arrBlocks.forEach(row => {
         row.forEach((column, index) => {
             if (column > 0) {
-                for (let i = 0; i < 4; i++) {
-                    if (index >= 0 &&
-                        column === row[i - 1]
-                    ) {
-                        console.log('+');
-                        row[index] += row[i - 1];
-                    }
+                for (let i = index; i > 0; i--) {
+                    if (row[i - 1] === 0) {
+                        row[i - 1] = column;
+                        row[i] = 0;
+                    } else if (row[i - 1] === column) {
+                        row[i - 1] += column;
+                        row[i] = 0;
+                        return;
+                    } else if (row[i - 1] > 0 && row[i - 1] !== column) return;
                 }
             }
         })
-        console.log(row)
     })
 };
+
+const slideRight = () => { // исправить баг с построением
+    arrBlocks.forEach(row => {
+        row.forEach((column, index) => {
+            if (column > 0) {
+                // console.log(column, index)
+                for (let i = index; i < 4; i++) {
+                    // console.log(i);
+                    if (row[i + 1] === 0) {
+                        row[i + 1] = column;
+                        row[i] = 0;
+                    } else if (row[i + 1] === column) {
+                        // console.log(row)
+                        // console.log(column)
+                        row[i + 1] += column;
+                        row[i] = 0;
+                        return;
+                    } else if (row[i + 1] > 0 && row[i + 1] !== column) return;
+                }
+            }
+        })
+    })
+}
 
 const isFull = () => {
     let full = false;
@@ -64,7 +88,7 @@ const moveBlocks = event => {
             slideLeft();
             break;
         case 'ArrowRight':
-
+            slideRight();
             break;
         case 'ArrowBottom':
 
@@ -72,7 +96,7 @@ const moveBlocks = event => {
     }
 
     if (arrowBtns.includes(event.code)) {
-        randomNum();
+        //randomNum();
     }
 
     render();
