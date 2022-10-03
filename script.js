@@ -1,54 +1,96 @@
 const container = document.querySelector('.container');
 const arrowBtns = ['ArrowUp', 'ArrowLeft', 'ArrowRight', 'ArrowBottom'];
 let arrBlocks = [
-    [4,4,2,2],
+    // [4,4,2,2],
+    // [2,2,4,4],
+    // [2,4,0,4],
+    // [2,0,2,4]
+    [0,0,0,0],
     [0,0,0,0],
     [0,0,0,0],
     [0,0,0,0]
 ]
 
+// Универсальная функция сортировки плит
+const slide = row => {
+    let dubplicatIndex = -1;
+    row.forEach((column, index) => {
+        if (column > 0) {
+            for (let i = index; i > 0; i--) {
+                if (row[i - 1] === 0) {
+                    row[i - 1] = column;
+                    row[i] = 0;
+                } else if (row[i - 1] === column && i - 1 !== dubplicatIndex) {
+                    row[i - 1] += column;
+                    row[i] = 0;
+                    dubplicatIndex = i - 1;
+                    return;
+                } else if (row[i - 1] > 0 && row[i - 1] !== column) return;
+            }
+        }
+    })
+}
+
+// Создание массива с колонками
+const createVerticalArr = () => {
+    let arrBlocksVert = [[],[],[],[]];
+    arrBlocks.forEach(row => {
+        row.forEach((item, index) => {
+            arrBlocksVert[index].push(item);
+        })
+    })
+    return arrBlocksVert;
+}
+
+// Движение влево
 const slideLeft = () => {
     arrBlocks.forEach(row => {
-        row.forEach((column, index) => {
-            if (column > 0) {
-                for (let i = index; i > 0; i--) {
-                    if (row[i - 1] === 0) {
-                        row[i - 1] = column;
-                        row[i] = 0;
-                    } else if (row[i - 1] === column) {
-                        row[i - 1] += column;
-                        row[i] = 0;
-                        return;
-                    } else if (row[i - 1] > 0 && row[i - 1] !== column) return;
-                }
-            }
+        slide(row);
+    })
+};
+
+// Движение вправо
+const slideRight = () => {
+    arrBlocks.forEach(row => {
+        row.reverse();
+        slide(row);
+        row.reverse();
+    })
+};
+
+// Движение вверх
+const slideUp = () => {
+    // Создаем массив колонок
+    let arrBlocksVert = createVerticalArr();
+
+    arrBlocksVert.forEach((column, index) => {
+        slide(column);
+
+        // Дублируем все изменения в основной массив что бы рендер мог вывести новые данные
+        column.forEach((item, i) => {
+            arrBlocks[i][index] = item;
         })
     })
 };
 
-const slideRight = () => { // исправить баг с построением
-    arrBlocks.forEach(row => {
-        row.forEach((column, index) => {
-            if (column > 0) {
-                // console.log(column, index)
-                for (let i = index; i < 4; i++) {
-                    // console.log(i);
-                    if (row[i + 1] === 0) {
-                        row[i + 1] = column;
-                        row[i] = 0;
-                    } else if (row[i + 1] === column) {
-                        // console.log(row)
-                        // console.log(column)
-                        row[i + 1] += column;
-                        row[i] = 0;
-                        return;
-                    } else if (row[i + 1] > 0 && row[i + 1] !== column) return;
-                }
-            }
+// Движение вниз
+const slideDown = () => {
+    // Создаем массив колонок
+    let arrBlocksVert = createVerticalArr();
+
+    arrBlocksVert.forEach((column, index) => {
+        column.reverse();
+        slide(column);
+        column.reverse();
+
+        // Дублируем все изменения в основной массив что бы рендер мог вывести новые данные
+        column.forEach((item, i) => {
+            arrBlocks[i][index] = item;
         })
     })
 }
 
+// Проверка на заполненность полей
 const isFull = () => {
     let full = false;
     arrBlocks.forEach(row => {
@@ -61,8 +103,9 @@ const isFull = () => {
     return full;
 }
 
+// Создание рандомных плит на поле
 const randomNum = () => {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 1; i++) {
         if (isFull()) {
             let found = false;
             while (!found) {
@@ -77,12 +120,11 @@ const randomNum = () => {
     }
 };
 
-//randomNum();
-
+// Обработка нажатий на кнопки и вызов соответствующих функций
 const moveBlocks = event => {
     switch (event.code) {
         case 'ArrowUp':
-
+            slideUp();
             break;
         case 'ArrowLeft':
             slideLeft();
@@ -90,32 +132,34 @@ const moveBlocks = event => {
         case 'ArrowRight':
             slideRight();
             break;
-        case 'ArrowBottom':
-
+        case 'ArrowDown':
+            slideDown();
             break;
     }
 
     if (arrowBtns.includes(event.code)) {
-        //randomNum();
+        randomNum();
     }
 
     render();
 };
 
-document.addEventListener('keydown', moveBlocks);
-
+// Вывод данных на страницу
 const render = () => {
     container.innerHTML = '';
     arrBlocks.forEach(row => {
-        row.forEach(itemRow => {
+        const rowItem = document.createElement('div');
+        rowItem.classList.add('row');
+        container.insertAdjacentElement('beforeend', rowItem);
+        row.forEach((itemRow, index) => {
             if (itemRow > 0) {
-                container.insertAdjacentHTML('beforeend',`
+                rowItem.insertAdjacentHTML('beforeend',`
                 <div class="block">
-                    <div class="fill__block">${itemRow}</div>
+                    <div class="fill__block x${itemRow}">${itemRow}</div>
                 </div>
             `);
             } else {
-                container.insertAdjacentHTML('beforeend',`
+                rowItem.insertAdjacentHTML('beforeend',`
                 <div class="block">
                     <div class="empty__block"></div>
                 </div>
@@ -125,4 +169,10 @@ const render = () => {
     })
 };
 
+// Создание первых плит для начала игры
+randomNum();
+// Первый вывод плит на странице
 render();
+
+// Обработка события нажатия на клавиши
+document.addEventListener('keydown', moveBlocks);
