@@ -12,7 +12,7 @@ let arrBlocks = [
 ]
 
 // Универсальная функция сортировки плит
-const slide = row => {
+const slide = (row, indexRow) => {
     let dubplicatIndex = -1;
     row.forEach((column, index) => {
         if (column > 0) {
@@ -20,10 +20,14 @@ const slide = row => {
                 if (row[i - 1] === 0) {
                     row[i - 1] = column;
                     row[i] = 0;
+                    const element = document.querySelector(`[data-index='${indexRow + ' ' + i}']`);
+                    if (element) element.dataset.index = `${indexRow} ${i - 1}`;
+
                 } else if (row[i - 1] === column && i - 1 !== dubplicatIndex) {
                     row[i - 1] += column;
                     row[i] = 0;
                     dubplicatIndex = i - 1;
+                    const element = document.querySelector(`[data-index='${indexRow + ' ' + i}']`)
                     return;
                 } else if (row[i - 1] > 0 && row[i - 1] !== column) return;
             }
@@ -44,16 +48,16 @@ const createVerticalArr = () => {
 
 // Движение влево
 const slideLeft = () => {
-    arrBlocks.forEach(row => {
-        slide(row);
+    arrBlocks.forEach((row, index) => {
+        slide(row, index);
     })
 };
 
 // Движение вправо
 const slideRight = () => {
-    arrBlocks.forEach(row => {
+    arrBlocks.forEach((row, index) => {
         row.reverse();
-        slide(row);
+        slide(row, index);
         row.reverse();
     })
 };
@@ -64,7 +68,7 @@ const slideUp = () => {
     let arrBlocksVert = createVerticalArr();
 
     arrBlocksVert.forEach((column, index) => {
-        slide(column);
+        slide(column, index);
 
         // Дублируем все изменения в основной массив что бы рендер мог вывести новые данные
         column.forEach((item, i) => {
@@ -80,7 +84,7 @@ const slideDown = () => {
 
     arrBlocksVert.forEach((column, index) => {
         column.reverse();
-        slide(column);
+        slide(column, index);
         column.reverse();
 
         // Дублируем все изменения в основной массив что бы рендер мог вывести новые данные
@@ -114,6 +118,10 @@ const randomNum = () => {
                 if (arrBlocks[row][column] === 0) {
                     arrBlocks[row][column] = 2;
                     found = true;
+                    container.insertAdjacentHTML('beforeend',`
+                    <div class="block fill__block" data-index="${row + ' ' + column}">
+                        <div class="block__text x2">2</div>
+                    </div>`);
                 }
             }
         }
@@ -138,7 +146,7 @@ const moveBlocks = event => {
     }
 
     if (arrowBtns.includes(event.code)) {
-        randomNum();
+        //randomNum();
     }
 
     render();
@@ -146,27 +154,60 @@ const moveBlocks = event => {
 
 // Вывод данных на страницу
 const render = () => {
-    container.innerHTML = '';
-    arrBlocks.forEach(row => {
-        const rowItem = document.createElement('div');
-        rowItem.classList.add('row');
-        container.insertAdjacentElement('beforeend', rowItem);
-        row.forEach((itemRow, index) => {
-            if (itemRow > 0) {
-                rowItem.insertAdjacentHTML('beforeend',`
-                <div class="block">
-                    <div class="fill__block x${itemRow}">${itemRow}</div>
-                </div>
-            `);
-            } else {
-                rowItem.insertAdjacentHTML('beforeend',`
-                <div class="block">
-                    <div class="empty__block"></div>
-                </div>
-            `);
-            }
-        })
+    const blocks = document.querySelectorAll('.block.fill__block');
+
+    if (blocks) blocks.forEach(item => {
+        const indexes = item.getAttribute('data-index'),
+            top = indexes[0],
+            left = indexes[2];
+
+        item.className = `block fill__block indexex__${top}-${left}`;
+
+        // item.style.top = `calc(15px * ${top + 1} + 106px * ${top});`
+
+
+        // item.style.left = `calc(15px * ${left + 1} + 106px * ${left});`
+
+        console.log('complete render')
     })
+
+    //console.log(blocks[0].getAttribute('data-index')[2])
+
+
+    // for (let i = 0; i < blocks.length; i++) {
+    //     const indexes = blocks[i].getAttribute('data-index'),
+    //         top = indexes[0],
+    //         left = indexes[2];
+    //
+    //     console.log(15 * (left + 1) + 106 * left);
+    //
+    //     blocks[i].style.top = `calc(15px * ${top + 1} + 106px * ${top});`
+    //     blocks[i].style.left = `calc(15px * ${left + 1} + 106px * ${left});`
+    //
+    //     console.log('complete render')
+    // }
+
+    // container.innerHTML = '';
+    // arrBlocks.forEach(row => {
+    //     const rowItem = document.createElement('div');
+    //     rowItem.classList.add('row');
+    //     container.insertAdjacentElement('beforeend', rowItem);
+    //     row.forEach((itemRow, index) => {
+    //         if (itemRow > 0) {
+    //             rowItem.insertAdjacentHTML('beforeend',`
+    //             <div class="block">
+    //                 <div class="fill__block x${itemRow}">${itemRow}</div>
+    //             </div>
+    //         `);
+    //         } else {
+    //             rowItem.insertAdjacentHTML('beforeend',`
+    //             <div class="block">
+    //                 <div class="empty__block"></div>
+    //             </div>
+    //         `);
+    //         }
+    //     })
+    // })
 };
 
 // Создание первых плит для начала игры
